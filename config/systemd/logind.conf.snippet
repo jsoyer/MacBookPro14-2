@@ -1,0 +1,5 @@
+# Add to [Login] section in /etc/systemd/logind.conf
+# Allows closing lid without suspend when on AC power / docked
+HandleLidSwitch=suspend
+HandleLidSwitchExternalPower=ignore
+HandleLidSwitchDocked=ignore

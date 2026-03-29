@@ -1,0 +1,23 @@
+# Place in /etc/libinput/local-overrides.quirks
+# Touchpad and keyboard calibration for MacBook Pro 14,2
+
+[Apple SPI Touchpad (MacBookPro14,2)]
+MatchBus=spi
+MatchUdevType=touchpad
+MatchDMIModalias=dmi:*svnAppleInc.:*pnMacBookPro14,2*
+ModelAppleTouchpad=1
+AttrTouchSizeRange=200:150
+AttrPalmSizeThreshold=1100
+
+[Apple SPI Keyboard]
+MatchBus=spi
+MatchUdevType=keyboard
+MatchDMIModalias=dmi:*svnAppleInc.:*
+AttrKeyboardIntegration=internal
+
+[Apple Touch Bar (USB)]
+MatchBus=usb
+MatchUdevType=touchpad
+MatchVendor=0x05AC
+MatchProduct=0x8600
+AttrKeyboardIntegration=internal

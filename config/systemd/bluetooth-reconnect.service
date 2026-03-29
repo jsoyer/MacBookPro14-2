@@ -1,0 +1,10 @@
+[Unit]
+Description=Restart Bluetooth after suspend
+After=suspend.target hibernate.target hybrid-sleep.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'sleep 2 && systemctl restart bluetooth'
+
+[Install]
+WantedBy=suspend.target hibernate.target hybrid-sleep.target

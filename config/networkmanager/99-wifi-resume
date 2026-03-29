@@ -1,0 +1,6 @@
+#!/bin/bash
+# Place in /etc/NetworkManager/dispatcher.d/99-wifi-resume
+# chmod +x after copying
+if [ "$2" = "connectivity-change" ] || [ "$2" = "up" ]; then
+    modprobe -r brcmfmac && modprobe brcmfmac
+fi

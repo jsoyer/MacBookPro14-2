@@ -1,0 +1,24 @@
+[Palette]
+Name=Catppuccin Mocha
+Foreground=#cdd6f4
+Background=#1e1e2e
+Cursor=#f5e0dc
+CursorForeground=#1e1e2e
+
+Color0=#45475a
+Color1=#f38ba8
+Color2=#a6e3a1
+Color3=#f9e2af
+Color4=#89b4fa
+Color5=#f5c2e7
+Color6=#94e2d5
+Color7=#bac2de
+
+Color8=#585b70
+Color9=#f38ba8
+Color10=#a6e3a1
+Color11=#f9e2af
+Color12=#89b4fa
+Color13=#f5c2e7
+Color14=#94e2d5
+Color15=#a6adc8

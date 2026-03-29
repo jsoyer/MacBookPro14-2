@@ -34,6 +34,7 @@ MacBookPro14,2/
 │   ├── networkmanager/99-wifi-resume         # 📶 WiFi resume after suspend
 │   ├── systemd/bluetooth-reconnect.service   # 🔵 BT reconnect after suspend
 │   ├── keyd/default.conf                     # ⌨️  ISO keyboard key swap fix
+│   ├── ptyxis/catppuccin-mocha.palette       # 🎨 Catppuccin Mocha terminal theme
 │   └── systemd/logind.conf.snippet           # 💤 Lid close behavior
 └── firmware/
     └── brcm/brcmfmac43602-pcie.txt          # 📶 WiFi NVRAM config
@@ -413,7 +414,20 @@ gsettings set org.gnome.settings-daemon.plugins.power lid-close-battery-action '
 
 ---
 
-## 🔄 7. Post Kernel Update Maintenance
+## 🎨 7. Terminal Theme (Ptyxis / Catppuccin Mocha)
+
+Fedora 43 GNOME uses **Ptyxis** as the default terminal (not gnome-terminal). The Catppuccin gnome-terminal install script will NOT work.
+
+```bash
+mkdir -p ~/.local/share/ptyxis/palettes
+cp config/ptyxis/catppuccin-mocha.palette ~/.local/share/ptyxis/palettes/
+```
+
+Then in Ptyxis: **Preferences > Profile > Palette** and select "Catppuccin Mocha".
+
+---
+
+## 🔄 8. Post Kernel Update Maintenance
 
 After each `dnf update` that updates the kernel, DKMS automatically rebuilds registered modules.
 
@@ -446,6 +460,7 @@ sudo ./install.cirrus.driver.sh
 | `/etc/dracut.conf.d/facetimehd.conf` | 📷 FaceTime HD firmware in initramfs |
 | `/etc/keyd/default.conf` | ⌨️ ISO keyboard key swap (keyd) |
 | `/etc/libinput/local-overrides.quirks` | 🖱️ Touchpad calibration |
+| `~/.local/share/ptyxis/palettes/*.palette` | 🎨 Ptyxis terminal theme |
 | `/lib/firmware/facetimehd/firmware.bin` | 📷 FaceTime HD firmware |
 
 ### 📦 Active Copr repos
@@ -926,7 +941,20 @@ gsettings set org.gnome.settings-daemon.plugins.power lid-close-battery-action '
 
 ---
 
-## 🔄 7. Maintenance apres mise a jour kernel
+## 🎨 7. Theme terminal (Ptyxis / Catppuccin Mocha)
+
+Fedora 43 GNOME utilise **Ptyxis** comme terminal par defaut (pas gnome-terminal). Le script d'installation Catppuccin pour gnome-terminal ne fonctionnera PAS.
+
+```bash
+mkdir -p ~/.local/share/ptyxis/palettes
+cp config/ptyxis/catppuccin-mocha.palette ~/.local/share/ptyxis/palettes/
+```
+
+Puis dans Ptyxis : **Preferences > Profil > Palette** et selectionner "Catppuccin Mocha".
+
+---
+
+## 🔄 8. Maintenance apres mise a jour kernel
 
 Apres chaque `dnf update` qui met a jour le kernel, DKMS recompile automatiquement les modules enregistres.
 

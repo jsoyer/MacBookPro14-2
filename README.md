@@ -116,14 +116,29 @@ The MacBook Pro 14,2 uses an SPI bus for the Touch Bar, keyboard backlight, and 
 | `apple-ib-tb` | 📱 Touch Bar (display & buttons) |
 | `apple-ib-als` | 💡 Ambient light sensor |
 
+### ⚠️ Kernel 6.x compatibility
+
+The upstream repo does not compile on kernel 6.x due to breaking API changes. A patch is included in this repository (`patches/0001-fix-kernel-6.x-api-changes.patch`) and is also available as a branch:
+
+- 🔗 [jsoyer/macbook12-spi-driver `fix/kernel-6.x-api-compat`](https://github.com/jsoyer/macbook12-spi-driver/tree/fix/kernel-6.x-api-compat)
+
+Changes: SPI delay API, IIO alloc API, EFI variable API, HID report_fixup signature, void platform_remove, header path updates. See [patch details](#-spi-driver-patch-details) at the bottom.
+
 ### 📦 Installation (DKMS)
 
 ```bash
 sudo dnf install gcc kernel-devel make dkms
 
-git clone https://github.com/roadrunner2/macbook12-spi-driver.git
+# Use the patched fork for kernel 6.x
+git clone -b fix/kernel-6.x-api-compat https://github.com/jsoyer/macbook12-spi-driver.git
 sudo cp -r macbook12-spi-driver /usr/src/applespi-0.1
 sudo dkms install -m applespi -v 0.1
+```
+
+**Alternative (upstream, kernel < 6.x only):**
+
+```bash
+git clone https://github.com/roadrunner2/macbook12-spi-driver.git
 ```
 
 **Alternative (Copr):**
@@ -437,6 +452,36 @@ sudo ./install.cirrus.driver.sh
 
 ---
 
+## 🩹 SPI Driver Patch Details
+
+The patch `patches/0001-fix-kernel-6.x-api-changes.patch` fixes the following kernel API breakages:
+
+| File | Change | Kernel version |
+|---|---|---|
+| `applespi.c` | `delay_usecs` -> `delay.value` + `delay.unit` | 5.13+ |
+| `applespi.c` | `asm/unaligned.h` -> `linux/unaligned.h` | 6.12+ |
+| `applespi.c` | `efivar_entry_{get,set_safe}` -> `efi.{get,set}_variable` | 6.6+ |
+| `applespi.c` | `no_llseek` -> `noop_llseek` | 6.8+ |
+| `applespi.c` | `spi_driver.remove` returns `void` | 6.1+ |
+| `apple-ibridge.c` | `hid_driver.report_fixup` returns `const __u8 *` | 6.12+ |
+| `apple-ibridge.c` | `acpi_driver.ops.remove` returns `void` | 6.2+ |
+| `apple-ibridge.c` | Remove `.owner` from `acpi_driver` | 6.4+ |
+| `apple-ib-als.c` | `iio_device_alloc(size)` -> `iio_device_alloc(dev, size)` | 5.19+ |
+| `apple-ib-als.c` | `iio_trigger_alloc(fmt)` -> `iio_trigger_alloc(dev, fmt)` | 5.19+ |
+| `apple-ib-als.c` | `iio_dev->id` -> `iio_device_id(iio_dev)` | 5.19+ |
+| `apple-ib-{als,tb}.c` | `platform_driver.remove` returns `void` | 6.1+ |
+
+Tested on: Fedora 43, kernel 6.19.9-200.fc43.x86_64, MacBook Pro 14,2.
+
+To apply manually:
+
+```bash
+cd macbook12-spi-driver
+git apply /path/to/patches/0001-fix-kernel-6.x-api-changes.patch
+```
+
+---
+
 ## 📜 License
 
 This repository is provided as-is for educational purposes. Individual drivers and firmware have their own licenses (GPL-2.0, proprietary Apple firmware).
@@ -562,14 +607,29 @@ Le MacBook Pro 14,2 utilise un bus SPI pour la Touch Bar, le retro-eclairage du 
 | `apple-ib-tb` | 📱 Touch Bar (affichage et boutons) |
 | `apple-ib-als` | 💡 Capteur de lumiere ambiante |
 
+### ⚠️ Compatibilite kernel 6.x
+
+Le repo upstream ne compile pas sur kernel 6.x a cause de changements d'API. Un patch est inclus dans ce depot (`patches/0001-fix-kernel-6.x-api-changes.patch`) et est aussi disponible en branche :
+
+- 🔗 [jsoyer/macbook12-spi-driver `fix/kernel-6.x-api-compat`](https://github.com/jsoyer/macbook12-spi-driver/tree/fix/kernel-6.x-api-compat)
+
+Changements : API SPI delay, API IIO alloc, API variables EFI, signature HID report_fixup, platform_remove void, chemins d'headers. Voir les [details du patch](#-details-du-patch-spi) en bas de page.
+
 ### 📦 Installation (DKMS)
 
 ```bash
 sudo dnf install gcc kernel-devel make dkms
 
-git clone https://github.com/roadrunner2/macbook12-spi-driver.git
+# Utiliser le fork patche pour kernel 6.x
+git clone -b fix/kernel-6.x-api-compat https://github.com/jsoyer/macbook12-spi-driver.git
 sudo cp -r macbook12-spi-driver /usr/src/applespi-0.1
 sudo dkms install -m applespi -v 0.1
+```
+
+**Alternative (upstream, kernel < 6.x uniquement) :**
+
+```bash
+git clone https://github.com/roadrunner2/macbook12-spi-driver.git
 ```
 
 **Alternative (Copr) :**
@@ -880,6 +940,36 @@ sudo ./install.cirrus.driver.sh
 | 📷 Camera kmod Copr | [mulderje/facetimehd-kmod](https://copr.fedorainfracloud.org/coprs/mulderje/facetimehd-kmod/) |
 | 📷 Wiki camera | [facetimehd wiki — Fedora](https://github.com/patjak/facetimehd/wiki/Installation#get-started-on-fedora) |
 | 📶 NVRAM WiFi | [gist de MikeRatcliffe](https://gist.github.com/MikeRatcliffe/9614c16a8ea09731a9d5e91685bd8c80) |
+
+---
+
+## 🩹 Details du patch SPI
+
+Le patch `patches/0001-fix-kernel-6.x-api-changes.patch` corrige les changements d'API kernel suivants :
+
+| Fichier | Changement | Version kernel |
+|---|---|---|
+| `applespi.c` | `delay_usecs` -> `delay.value` + `delay.unit` | 5.13+ |
+| `applespi.c` | `asm/unaligned.h` -> `linux/unaligned.h` | 6.12+ |
+| `applespi.c` | `efivar_entry_{get,set_safe}` -> `efi.{get,set}_variable` | 6.6+ |
+| `applespi.c` | `no_llseek` -> `noop_llseek` | 6.8+ |
+| `applespi.c` | `spi_driver.remove` retourne `void` | 6.1+ |
+| `apple-ibridge.c` | `hid_driver.report_fixup` retourne `const __u8 *` | 6.12+ |
+| `apple-ibridge.c` | `acpi_driver.ops.remove` retourne `void` | 6.2+ |
+| `apple-ibridge.c` | Suppression de `.owner` dans `acpi_driver` | 6.4+ |
+| `apple-ib-als.c` | `iio_device_alloc(size)` -> `iio_device_alloc(dev, size)` | 5.19+ |
+| `apple-ib-als.c` | `iio_trigger_alloc(fmt)` -> `iio_trigger_alloc(dev, fmt)` | 5.19+ |
+| `apple-ib-als.c` | `iio_dev->id` -> `iio_device_id(iio_dev)` | 5.19+ |
+| `apple-ib-{als,tb}.c` | `platform_driver.remove` retourne `void` | 6.1+ |
+
+Teste sur : Fedora 43, kernel 6.19.9-200.fc43.x86_64, MacBook Pro 14,2.
+
+Pour appliquer manuellement :
+
+```bash
+cd macbook12-spi-driver
+git apply /path/to/patches/0001-fix-kernel-6.x-api-changes.patch
+```
 
 ---
 

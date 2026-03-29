@@ -172,10 +172,9 @@ The `applespi` driver sends inverted keycodes for `KEY_GRAVE` (41) and `KEY_102N
 Fix using [`keyd`](https://github.com/rvaiya/keyd) (evdev-level remapper, works on Wayland):
 
 ```bash
-# Build and install keyd (not packaged on Fedora)
-sudo dnf install gcc make git
-git clone https://github.com/rvaiya/keyd.git /tmp/keyd
-cd /tmp/keyd && make && sudo make install
+# Install keyd via Copr (Fedora)
+sudo dnf copr enable alternateved/keyd
+sudo dnf install keyd
 
 # Copy config and enable
 sudo mkdir -p /etc/keyd
@@ -183,7 +182,7 @@ sudo cp config/keyd/default.conf /etc/keyd/default.conf
 sudo systemctl enable --now keyd
 ```
 
-> **Note:** `hwdb` rules do not work here because `applespi` does not emit `MSC_SCAN` events. XKB modifications are cached aggressively by GNOME Wayland and are unreliable for this fix.
+> **Note:** `hwdb` rules do not work here because `applespi` does not emit `MSC_SCAN` events. XKB modifications are cached aggressively by GNOME Wayland and are unreliable for this fix. Alternatively, compile from source: https://github.com/rvaiya/keyd
 
 ### 📝 Notes
 
@@ -454,6 +453,7 @@ sudo ./install.cirrus.driver.sh
 | Repo | Purpose |
 |---|---|
 | `frgt10/facetimehd-dkms` | 📷 FaceTime HD camera module |
+| `alternateved/keyd` | ⌨️ keyd key remapper |
 
 ---
 

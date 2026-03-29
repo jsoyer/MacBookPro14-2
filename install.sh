@@ -137,14 +137,9 @@ echo "[9/9] Installing keyd (ISO keyboard key swap fix)..."
 if command -v keyd &>/dev/null; then
     echo "  -> keyd already installed."
 else
-    if [[ -d /tmp/keyd ]]; then
-        rm -rf /tmp/keyd
-    fi
-    git clone https://github.com/rvaiya/keyd.git /tmp/keyd
-    cd /tmp/keyd
-    make
-    make install
-    echo "  -> keyd compiled and installed."
+    dnf copr enable -y alternateved/keyd
+    dnf install -y keyd
+    echo "  -> keyd installed via Copr."
 fi
 mkdir -p /etc/keyd
 cp "${SCRIPT_DIR}/config/keyd/default.conf" /etc/keyd/default.conf

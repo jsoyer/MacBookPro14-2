@@ -20,12 +20,12 @@ echo "============================================"
 echo ""
 
 # --- Prerequisites ---
-echo "[1/8] Installing prerequisites..."
+echo "[1/9] Installing prerequisites..."
 dnf install -y gcc kernel-devel make patch wget dkms
 
 # --- Sound (Cirrus CS8409) ---
 echo ""
-echo "[2/8] Installing sound driver (Cirrus CS8409)..."
+echo "[2/9] Installing sound driver (Cirrus CS8409)..."
 if lsmod | grep -q snd_hda_codec_cs8409; then
     echo "  -> Already loaded, skipping."
 else
@@ -40,7 +40,7 @@ fi
 
 # --- SPI (Touch Bar, Keyboard backlight, ALS) ---
 echo ""
-echo "[3/8] Installing SPI drivers (Touch Bar, backlight, ALS)..."
+echo "[3/9] Installing SPI drivers (Touch Bar, backlight, ALS)..."
 if dkms status | grep -q "applespi"; then
     echo "  -> Already installed via DKMS, skipping."
 else
@@ -55,7 +55,7 @@ fi
 
 # --- FaceTime HD Camera ---
 echo ""
-echo "[4/8] Installing FaceTime HD camera..."
+echo "[4/9] Installing FaceTime HD camera..."
 if dkms status | grep -q "facetimehd"; then
     echo "  -> Already installed via DKMS, skipping."
 else
@@ -80,7 +80,7 @@ fi
 
 # --- WiFi (Broadcom BCM43602) ---
 echo ""
-echo "[5/8] Configuring WiFi (Broadcom BCM43602)..."
+echo "[5/9] Configuring WiFi (Broadcom BCM43602)..."
 cp "${SCRIPT_DIR}/config/modprobe/brcmfmac.conf" /etc/modprobe.d/brcmfmac.conf
 cp "${SCRIPT_DIR}/config/networkmanager/wifi-powersave-off.conf" /etc/NetworkManager/conf.d/wifi-powersave-off.conf
 echo "  -> Offloading disabled, power save off."
@@ -101,7 +101,7 @@ echo "  -> WiFi resume dispatcher installed."
 
 # --- Dracut (keyboard + facetimehd firmware in initramfs) ---
 echo ""
-echo "[6/8] Configuring dracut..."
+echo "[6/9] Configuring dracut..."
 cp "${SCRIPT_DIR}/config/dracut/keyboard.conf" /etc/dracut.conf.d/keyboard.conf
 echo "  -> SPI keyboard dracut config installed."
 cp "${SCRIPT_DIR}/config/dracut/facetimehd.conf" /etc/dracut.conf.d/facetimehd.conf
@@ -110,7 +110,7 @@ echo "  -> Run 'dracut --force' to rebuild initramfs."
 
 # --- Lid close behavior ---
 echo ""
-echo "[7/8] Configuring lid close behavior..."
+echo "[7/9] Configuring lid close behavior..."
 if grep -q "HandleLidSwitchExternalPower" /etc/systemd/logind.conf; then
     echo "  -> Already configured, skipping."
 else
@@ -126,10 +126,30 @@ fi
 
 # --- libinput quirks ---
 echo ""
-echo "[8/8] Installing libinput quirks..."
+echo "[8/9] Installing libinput quirks..."
 mkdir -p /etc/libinput
 cp "${SCRIPT_DIR}/config/libinput/local-overrides.quirks" /etc/libinput/local-overrides.quirks
 echo "  -> Touchpad quirks installed."
+
+# --- keyd (ISO keyboard fix) ---
+echo ""
+echo "[9/9] Installing keyd (ISO keyboard key swap fix)..."
+if command -v keyd &>/dev/null; then
+    echo "  -> keyd already installed."
+else
+    if [[ -d /tmp/keyd ]]; then
+        rm -rf /tmp/keyd
+    fi
+    git clone https://github.com/rvaiya/keyd.git /tmp/keyd
+    cd /tmp/keyd
+    make
+    make install
+    echo "  -> keyd compiled and installed."
+fi
+mkdir -p /etc/keyd
+cp "${SCRIPT_DIR}/config/keyd/default.conf" /etc/keyd/default.conf
+systemctl enable --now keyd
+echo "  -> keyd configured and enabled (KEY_GRAVE <-> KEY_102ND swap)."
 
 echo ""
 echo "============================================"

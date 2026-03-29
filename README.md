@@ -33,6 +33,7 @@ MacBookPro14,2/
 │   ├── networkmanager/wifi-powersave-off.conf # 📶 Disable WiFi power save
 │   ├── networkmanager/99-wifi-resume         # 📶 WiFi resume after suspend
 │   ├── systemd/bluetooth-reconnect.service   # 🔵 BT reconnect after suspend
+│   ├── keyd/default.conf                     # ⌨️  ISO keyboard key swap fix
 │   └── systemd/logind.conf.snippet           # 💤 Lid close behavior
 └── firmware/
     └── brcm/brcmfmac43602-pcie.txt          # 📶 WiFi NVRAM config
@@ -163,6 +164,26 @@ sudo dracut --force
 dkms status | grep applespi
 lsmod | grep -E 'applespi|apple_ib|apple_ibridge'
 ```
+
+### ⌨️ ISO keyboard fix (swapped `@#` and `<>` keys)
+
+The `applespi` driver sends inverted keycodes for `KEY_GRAVE` (41) and `KEY_102ND` (86) on ISO keyboards. This swaps the `@#` key (left of `1`) with the `<>` key (next to left shift).
+
+Fix using [`keyd`](https://github.com/rvaiya/keyd) (evdev-level remapper, works on Wayland):
+
+```bash
+# Build and install keyd (not packaged on Fedora)
+sudo dnf install gcc make git
+git clone https://github.com/rvaiya/keyd.git /tmp/keyd
+cd /tmp/keyd && make && sudo make install
+
+# Copy config and enable
+sudo mkdir -p /etc/keyd
+sudo cp config/keyd/default.conf /etc/keyd/default.conf
+sudo systemctl enable --now keyd
+```
+
+> **Note:** `hwdb` rules do not work here because `applespi` does not emit `MSC_SCAN` events. XKB modifications are cached aggressively by GNOME Wayland and are unreliable for this fix.
 
 ### 📝 Notes
 
@@ -424,6 +445,7 @@ sudo ./install.cirrus.driver.sh
 | `/etc/bluetooth/main.conf` | 🔵 Bluez config |
 | `/etc/dracut.conf.d/keyboard.conf` | ⌨️ SPI keyboard in initramfs |
 | `/etc/dracut.conf.d/facetimehd.conf` | 📷 FaceTime HD firmware in initramfs |
+| `/etc/keyd/default.conf` | ⌨️ ISO keyboard key swap (keyd) |
 | `/etc/libinput/local-overrides.quirks` | 🖱️ Touchpad calibration |
 | `/lib/firmware/facetimehd/firmware.bin` | 📷 FaceTime HD firmware |
 
@@ -654,6 +676,26 @@ sudo dracut --force
 dkms status | grep applespi
 lsmod | grep -E 'applespi|apple_ib|apple_ibridge'
 ```
+
+### ⌨️ Fix clavier ISO (touches `@#` et `<>` inversees)
+
+Le driver `applespi` envoie des keycodes inverses pour `KEY_GRAVE` (41) et `KEY_102ND` (86) sur les claviers ISO. La touche `@#` (a gauche du `1`) est permutee avec la touche `<>` (a cote du shift gauche).
+
+Fix avec [`keyd`](https://github.com/rvaiya/keyd) (remapper evdev, fonctionne sous Wayland) :
+
+```bash
+# Compiler et installer keyd (pas disponible en paquet sur Fedora)
+sudo dnf install gcc make git
+git clone https://github.com/rvaiya/keyd.git /tmp/keyd
+cd /tmp/keyd && make && sudo make install
+
+# Copier la config et activer
+sudo mkdir -p /etc/keyd
+sudo cp config/keyd/default.conf /etc/keyd/default.conf
+sudo systemctl enable --now keyd
+```
+
+> **Note :** Les regles `hwdb` ne fonctionnent pas ici car `applespi` n'emet pas d'evenements `MSC_SCAN`. Les modifications XKB sont cachees agressivement par GNOME Wayland et ne sont pas fiables pour ce fix.
 
 ### 📝 Notes
 
